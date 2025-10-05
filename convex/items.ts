@@ -2,6 +2,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
+import { Item } from "../utils/types";
 
 
 /// MUTATIONS
@@ -42,7 +43,7 @@ export const createItem = mutation({
  */
 export const getActiveItems = query({
     handler: async (ctx) => {
-        return await ctx.db.query("items").filter((q) => q.eq(q.field("isActive"), true)).collect();
+        return await ctx.db.query("items").filter((q) => q.eq(q.field("isActive"), true)).collect() as Item[]
     }
 });
 

@@ -5,22 +5,18 @@ import { api } from "../convex/_generated/api";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
+import { Grid } from "@chakra-ui/react";
+import ItemList from "@/components/ItemList";
 
 export default function Home() {
+
+const items = useQuery(api.items.getActiveItems)
+
   return (
-    <>
-      <header>
-        Convex + Next.js + Convex Auth
-        <SignOutButton />
-      </header>
-      <main className="p-8 flex flex-col gap-8">
-        <h1 className="text-4xl font-bold text-center">
-          Convex + Next.js + Convex Auth
-        </h1>
-        <Content />
-      </main>
-    </>
-  );
+    <Grid>
+      <ItemList items={items} />
+    </Grid>
+  )
 }
 
 function SignOutButton() {
