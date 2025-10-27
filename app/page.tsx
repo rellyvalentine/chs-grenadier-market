@@ -7,6 +7,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { Grid } from "@chakra-ui/react";
 import ItemList from "@/components/ItemList";
+import CartModal from "@/components/CartModal";
 
 export default function Home() {
 
@@ -14,6 +15,7 @@ const items = useQuery(api.items.getActiveItems)
 
   return (
     <Grid>
+      <CartModal />
       <ItemList items={items} />
     </Grid>
   )

@@ -1,4 +1,5 @@
-import { Id } from "@/convex/_generated/dataModel";
+import { Id } from "../convex/_generated/dataModel";
+
 
 
 export enum ItemCategories {
@@ -16,4 +17,17 @@ export type Item = {
     quantity: number;
     category: string;
     isActive: boolean;
+}
+
+export type CartItem = {
+    _id: Id<"cartItems">;
+    cartId: Id<"cart">;
+    itemId: Id<"items">;
+    quantity: number;
+    type: "donate" | "pickup";
+}
+
+export type CartItems = {
+    donateItems: CartItem[];
+    pickupItems: CartItem[];
 }
