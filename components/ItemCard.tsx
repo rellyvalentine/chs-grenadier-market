@@ -30,7 +30,7 @@ export default function ItemCard(props: { item: Item }) {
     }
     return (
         <Card.Root>
-            <Image />
+            <Image src="https://picsum.photos/275/250" alt={props.item.name}/>
             <Card.Body>
                 <Card.Title>{props.item.name}</Card.Title>
                 <Card.Description>{props.item.description}</Card.Description>

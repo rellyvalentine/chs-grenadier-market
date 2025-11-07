@@ -5,19 +5,22 @@ import { api } from "../convex/_generated/api";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { Grid } from "@chakra-ui/react";
+import { Grid, VStack, Text } from "@chakra-ui/react";
 import ItemList from "@/components/ItemList";
 import CartModal from "@/components/CartModal";
+import Header from "@/components/Header";
 
 export default function Home() {
 
 const items = useQuery(api.items.getActiveItems)
 
   return (
-    <Grid>
-      <CartModal />
+    <VStack margin="auto" maxWidth="1200px" gap={8}>
+      <Header />
+      <Text>Welcome to the Grenadier Market</Text>
+      <Text textAlign="center">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed mi ut odio pellentesque malesuada. Phasellus eleifend enim vel dolor cursus porta. Integer pharetra urna a accumsan rutrum. Donec quam massa, tempor in sollicitudin semper, auctor maximus tortor. Cras dapibus accumsan lectus sit amet pulvinar. Etiam consectetur ligula augue, at dignissim diam elementum a. Mauris at nisi hendrerit, facilisis nulla non, consectetur dui. Suspendisse non orci eu nibh iaculis elementum.</Text>
       <ItemList items={items} />
-    </Grid>
+    </VStack>
   )
 }
 

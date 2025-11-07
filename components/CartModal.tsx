@@ -1,24 +1,28 @@
 import { api } from "@/convex/_generated/api";
-import { Item, ItemCategories } from "@/utils/types";
-import { Button, CloseButton, Dialog, Field, Input, Portal, Select, Text, Textarea, VStack, createListCollection } from "@chakra-ui/react";
-import { useMutation, useQuery } from "convex/react";
+import { Button, CloseButton, Dialog, Field, HStack, Icon, IconButton, Input, Portal, Select, Text, VStack, } from "@chakra-ui/react";
+import { FaShoppingCart } from "react-icons/fa";
 import { useState } from "react";
-import { useForm } from "react-hook-form"
-import CartItemList from "./CartItemList";
+import Cart from "./Cart";
+import { useQuery } from "convex/react";
+import LoginPortal from "./LoginPortal";
 
 
 
 export default function CartModal() {
 
     const [open, setOpen] = useState<boolean>(false)
-    const userCartItems = useQuery(api.cart.getUserCartItems)
-    console.log(userCartItems)
+
+    const user = useQuery(api.users.getCurrentUser)
+    
     return (
-        <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+        <Dialog.Root size="xl" open={open} onOpenChange={(e) => setOpen(e.open)}>
             <Dialog.Trigger>
-                <Button>Open Cart</Button>
+                <IconButton aria-label="Open Cart" variant="ghost">
+                    <Icon as={FaShoppingCart} />
+                </IconButton>
             </Dialog.Trigger>
-            <Portal>
+            {user ? (
+                <Portal>
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
                     <Dialog.Content>
@@ -26,8 +30,7 @@ export default function CartModal() {
                             <Dialog.Title>Your Cart</Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body>
-                            <Text>Items in your cart</Text>
-                            <CartItemList />
+                            <Cart />
                         </Dialog.Body>
                         <Dialog.Footer>
                             <Dialog.ActionTrigger asChild>
@@ -40,8 +43,10 @@ export default function CartModal() {
                         </Dialog.CloseTrigger>
                     </Dialog.Content>
                 </Dialog.Positioner>
-
             </Portal>
+            ) : (
+                <LoginPortal />
+            )}
         </Dialog.Root>
     )
 }

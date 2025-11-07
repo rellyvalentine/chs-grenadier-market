@@ -31,3 +31,9 @@ export type CartItems = {
     donateItems: CartItem[];
     pickupItems: CartItem[];
 }
+
+export type Timeslot = {
+    date: Date;
+    startTime: string;
+    available: boolean;
+}
