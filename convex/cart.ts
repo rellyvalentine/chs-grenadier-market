@@ -119,6 +119,7 @@ export const getUserCartItems = query({
             itemId: cartItem.itemId,
             quantity: cartItem.quantity,
             type: cartItem.type,
+            selected: undefined,
         }))
 
         // filter the items by order type (donate or pickup)
@@ -166,6 +167,7 @@ export const getCartItem = internalQuery({
             itemId: result.itemId,
             quantity: result.quantity,
             type: result.type,
+            selected: false,
         } : null
         return cartItem
     }

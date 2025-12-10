@@ -5,12 +5,15 @@ import { useQuery } from "convex/react";
 import CartItemQuantity from "./CartItemQuantity";
 
 
-export default function CartItemEntry(props: { cartItem: CartItem, disabled?: boolean }) {
+export default function CartItemEntry(props: { cartItem: CartItem, disabled?: boolean, onSelect: (item: CartItem) => void }) {
     const item = useQuery(api.items.getItem, { id: props.cartItem.itemId })
     return (
         <HStack width="full" justify="space-between" alignItems="center" gap={4}>
             <Box flex="0 0 28px">
-                <Checkbox.Root disabled={props.disabled}>
+                <Checkbox.Root disabled={props.disabled} onCheckedChange={(e) => {
+                    props.cartItem.selected = !!e.checked
+                    props.onSelect(props.cartItem)
+                }}>
                     <Checkbox.HiddenInput />
                     <Checkbox.Control>
                         <Checkbox.Indicator />

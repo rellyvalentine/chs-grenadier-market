@@ -1,28 +1,23 @@
 import { Heading, HStack, VStack, Text, RadioCard, Box, Input } from "@chakra-ui/react";
 import CartItemList from "./CartItemList";
-import { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import Timeslots from "./Timeslots";
-import * as DateFNS from "date-fns"
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
+import PickupScheduler from "./PickupScheduler";
+import { CartItem, CartItems, OrderDraft } from "@/utils/types";
 
-type TExcludeDateIntervals = {
-    start: Date;
-    end: Date;
-}[];
-
-export default function Cart() {
+export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) => void }) {
 
     const cartItems = useQuery(api.cart.getUserCartItems)
 
-    // default order type will be set to donate if there are both donate and pickup items in the cart 
-    // otherwise it will be whichever has at least one item
+    // Set the initial order type
     const [orderType, setOrderType] = useState<"donate" | "pickup">("donate");
     useEffect(() => {
         if(cartItems)
         {
+            // Default order type will be set to donate if there are both donate and pickup items in the cart 
+            // otherwise it will be whichever has at least one item in the cart
             if(cartItems.donateItems.length > 0 && cartItems.pickupItems.length > 0) {
                 setOrderType("donate")
             } else if(cartItems.donateItems.length > 0) {
@@ -33,15 +28,57 @@ export default function Cart() {
         }
     }, [cartItems])
 
-    
-    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+    // Use a ref to store the selected date and time while preventing re-rendering
+    const pickupRef = useRef<{ date: Date, time: number } | null>(null)
 
-    const excludeDates: TExcludeDateIntervals = [
-        {
-            start: new Date(0),
-            end: DateFNS.subDays(new Date(), 1)
+    // Update the order draft when the pickup date and time are changed
+    const handlePickupChange = useCallback((date: Date, time: number) => {
+        pickupRef.current = { date, time }
+        if(cartItems) {
+            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
+            props.onOrderDraftChange({
+                orderType: orderType,
+                date: date,
+                time: time,
+                cartItems: items,
+            })
         }
-    ]
+    }, [])
+
+    // Use a ref to store the cart items while preventing re-rendering
+    const cartItemsRef = useRef<CartItems>(cartItems)
+
+    // Update the order draft when the cart items are changed
+    const handleCartItemsChange = useCallback((cartItems: CartItems) => {
+        console.log("Cart Items Change", cartItems)
+        cartItemsRef.current = cartItems
+        if(cartItems) {
+            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
+            props.onOrderDraftChange({
+                orderType: orderType,
+                date: pickupRef.current?.date,
+                time: pickupRef.current?.time,
+                cartItems: items,
+            })
+        }
+    }, [])
+
+    // Update the order draft when the order type is changed
+    useEffect(() => {
+        console.log("Order Update")
+        let draft: OrderDraft = {
+            orderType: orderType,
+            date: pickupRef.current?.date,
+            time: pickupRef.current?.time,
+            cartItems: [],
+        }
+        if(cartItems) {
+            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
+            draft.cartItems = items;
+        }
+        props.onOrderDraftChange(draft)
+    }, [orderType])
+
 
     return (
         <VStack margin={8} gap={8}>
@@ -81,7 +118,7 @@ export default function Cart() {
                                 <VStack maxH="500px" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "donate" ? "white" : "#F4F4F5"}>
                                     <Heading size="md" fontWeight="semibold" color={orderType === "donate" ? "black" : "gray.500"}>Donate Items</Heading>
                                     <Box flex="1" overflowY="auto" width="full">    
-                                        <CartItemList cartItems={cartItems} type="donate" disabled={orderType === "pickup"} />
+                                        <CartItemList cartItems={cartItems} type="donate" disabled={orderType === "pickup"} onCartItemsChange={handleCartItemsChange} />
                                     </Box>
                                 </VStack>
                             )}
@@ -89,7 +126,7 @@ export default function Cart() {
                                 <VStack height="full" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "pickup" ? "white" : "#F4F4F5"}>
                                     <Heading size="md" fontWeight="semibold" color={orderType === "pickup" ? "black" : "gray.500"}>Pickup Items</Heading>
                                     <Box flex="1" overflowY="auto" width="full">
-                                        <CartItemList cartItems={cartItems} type="pickup" disabled={orderType === "donate"} />
+                                        <CartItemList cartItems={cartItems} type="pickup" disabled={orderType === "donate"} onCartItemsChange={handleCartItemsChange} />
                                     </Box>
                                 </VStack>
                             )}
@@ -97,24 +134,8 @@ export default function Cart() {
                     )}
                 </HStack>
             </VStack>
-            <VStack width="full" gap={2}>
-                <Heading size="lg">Select the pickup date and time</Heading>
-                <HStack width="full" justify="space-evenly" align="stretch" gap={4}>
-                    <VStack alignItems="start">
-                        <Heading size="md" fontWeight="semibold">Choose a date</Heading>
-                        <DatePicker
-                            selected={selectedDate}
-                            onChange={(date: Date | null) => setSelectedDate(date)}
-                            excludeDateIntervals={excludeDates}
-                            inline
-                        />
-                    </VStack>
-                    <VStack alignItems="start">
-                        <Heading size="md" fontWeight="semibold">Choose a timeslot</Heading>
-                        <Timeslots date={selectedDate} />
-                    </VStack>
-                </HStack>
-            </VStack>
+            {/* Use a ref to store the selected date and time while preventing re-rendering */}
+            <PickupScheduler onChange={handlePickupChange} />
         </VStack>
     )
 }
