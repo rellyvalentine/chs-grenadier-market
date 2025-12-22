@@ -8,22 +8,22 @@ import { useCallback } from "react";
 export default function CartItemList(props: { cartItems: CartItems, type: "donate" | "pickup", disabled?: boolean, onCartItemsChange: (cartItems: CartItems) => void }) {
 
     const handleSelect = useCallback((item: CartItem) => {
-        console.log("Checked change", item)
+        const newItems = { ...props.cartItems }
         if(props.type === "donate") {
-            props.cartItems.donateItems.map((donateItem) => {
+            newItems.donateItems.map((donateItem) => {
                 if(donateItem._id === item._id) {
                     donateItem.selected = item.selected
                 }
             })
         }
         if(props.type === "pickup") {
-            props.cartItems.pickupItems.map((pickupItem) => {
+            newItems.pickupItems.map((pickupItem) => {
                 if(pickupItem._id === item._id) {
                     pickupItem.selected = item.selected
                 }
             })
         }
-        props.onCartItemsChange(props.cartItems)
+        props.onCartItemsChange(newItems)
     }, [])
 
     return (

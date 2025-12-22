@@ -49,12 +49,14 @@ export const addCartItemsToOrder = internalMutation({
     handler: async (ctx, args) => {
         // Add each cart item to the order
         for(const cartItem of args.cartItems) {
+            if(cartItem.selected) {
             const orderItemId = await ctx.runMutation(internal.orders.addItemToOrder, { orderId: args.orderId, itemId: cartItem.itemId, quantity: cartItem.quantity })
-            if(!orderItemId) {
-                throw new Error("Failed to add cart item to order")
-            }
-            else {
-                await ctx.db.delete(cartItem._id)
+                if(!orderItemId) {
+                    throw new Error("Failed to add cart item to order")
+                }
+                else {
+                    await ctx.db.delete(cartItem._id)
+                }
             }
         }
         return true

@@ -1,4 +1,5 @@
-import { Button, CloseButton, Dialog, Field, HStack, Icon, IconButton, Input, Portal, Select, Text, VStack, } from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Icon, IconButton, Portal } from "@chakra-ui/react";
+import { Toaster, toaster } from "@/components/ui/toaster"
 import { FaShoppingCart } from "react-icons/fa";
 import { useCallback, useRef, useState } from "react";
 import Cart from "./Cart";
@@ -18,19 +19,79 @@ export default function CartModal() {
     const draftRef = useRef<OrderDraft | null>(null)
     // The callback is used to update the draftRef within the Cart component without causing a re-render
     const handleDraftChange = useCallback((draft: OrderDraft) => {
+        console.log("Draft Change", draft)
         draftRef.current = draft
     }, [])
 
 
     const createOrder = useMutation(api.orders.createOrder)
     const handleSubmit = async () => {
-        console.log(draftRef.current)
         if(draftRef.current) {
-            const orderId = await createOrder({
+
+            // Check if there are any cart items
+            if(draftRef.current.cartItems.length === 0) {
+                console.log("No cart items")
+                toaster.create({
+                    title: "Please select an item for your order",
+                    description: "You need to add cart items to submit an order",
+                    type: "error",
+                })
+                return
+            } else {
+                // Check if at least one item is selected
+                if(!draftRef.current.cartItems.some(item => item.selected)) {
+                    console.log("No items are selected")
+                    toaster.create({
+                        title: "Please select an item for your order",
+                        description: "You need to select at least one item to submit an order",
+                        type: "error",
+                    })
+                    return
+                }
+            }
+
+            // Check if a date and time are selected
+            if(!draftRef.current.date || !draftRef.current.time) {
+                console.log("No date or time")
+                toaster.create({
+                    title: "Please select a date and time",
+                    description: "You need to select a date and time to submit an order",
+                    type: "error",
+                })
+                return
+            }
+
+            const order = {
                 orderType: draftRef.current.orderType,
                 date: draftRef.current.date.getTime(),
                 time: draftRef.current.time,
-                cartItems: draftRef.current.cartItems,
+                cartItems: draftRef.current.cartItems.filter(item => item.selected),
+            }
+            console.log(order)
+
+            const orderId = await createOrder(order)
+
+            if(orderId) {
+                toaster.create({
+                    title: "Order created successfully",
+                    description: "You can view your order in your profile",
+                    type: "success",
+                })
+                setOpen(false)
+            } else {
+                toaster.create({
+                    title: "Failed to create order",
+                    description: "Please try again",
+                    type: "error",
+                })
+            }
+        }
+        else {
+            console.log("No draft")
+            toaster.create({
+                title: "Please select items to your order",
+                description: "You need to add cart items to submit an order",
+                type: "error",
             })
         }
     }
@@ -72,6 +133,7 @@ export default function CartModal() {
                     </Dialog.Content>
                 </Dialog.Positioner>
             </Portal>
+            <Toaster />
         </Dialog.Root>
     )
 }

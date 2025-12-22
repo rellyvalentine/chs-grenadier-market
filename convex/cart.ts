@@ -119,7 +119,7 @@ export const getUserCartItems = query({
             itemId: cartItem.itemId,
             quantity: cartItem.quantity,
             type: cartItem.type,
-            selected: undefined,
+            selected: false,
         }))
 
         // filter the items by order type (donate or pickup)

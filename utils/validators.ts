@@ -33,4 +33,6 @@ export const cartItemValidator = v.object({
     cartId: v.id("cart"),
     itemId: v.id("items"),
     quantity: v.number(),
+    type: v.union(v.literal("donate"), v.literal("pickup")),
+    selected: v.boolean(),
 })

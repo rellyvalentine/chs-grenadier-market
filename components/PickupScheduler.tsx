@@ -58,13 +58,10 @@ function getDateRange(): DateRange {
 	};
 }
 
-export default function PickupScheduler(props: { onChange?: (date: Date, time: number) => void }) {
+export default function PickupScheduler(props: { onChange: (date: Date, time: number) => void }) {
 	const { excludeDates, includeDates } = getDateRange();
 	const [selectedDate, setSelectedDate] = useState<Date>(includeDates[0].start);
 	const [selectedTime, setSelectedTime] = useState<number>(0);
-
-	// Call the onChange callback with the initial selected date and time
-	props.onChange?.(selectedDate, selectedTime);
 
 	return (
 		<VStack width="full" gap={2}>
@@ -78,9 +75,10 @@ export default function PickupScheduler(props: { onChange?: (date: Date, time: n
 						selected={selectedDate}
 						onChange={(date: Date | null) => {
 							if (date) {
+								// Set the datetime to the start of the selected day
 								date.setHours(0, 0, 0, 0);
 								setSelectedDate(date);
-								if (props.onChange) props.onChange(date, selectedTime);
+								props.onChange(date, selectedTime);
 							}
 						}}
 						excludeDateIntervals={excludeDates}
@@ -96,10 +94,7 @@ export default function PickupScheduler(props: { onChange?: (date: Date, time: n
 						date={selectedDate}
 						onTimeSelect={(time: number) => {
 							setSelectedTime(time);
-							if (props.onChange) {
-								console.log(selectedDate, time)
-								props.onChange(selectedDate, time);
-							}
+							props.onChange(selectedDate, time);
 						}}
 					/>
 				</VStack>

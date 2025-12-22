@@ -1,6 +1,6 @@
 import { Heading, HStack, VStack, Text, RadioCard, Box, Input } from "@chakra-ui/react";
 import CartItemList from "./CartItemList";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -9,76 +9,65 @@ import { CartItem, CartItems, OrderDraft } from "@/utils/types";
 
 export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) => void }) {
 
-    const cartItems = useQuery(api.cart.getUserCartItems)
+    const [orderType, setOrderType] = useState<"donate" | "pickup">("donate")
+    const [cartItems, setCartItems] = useState<CartItems | null>(null)
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+    const [selectedTime, setSelectedTime] = useState<number | null>(null)
 
-    // Set the initial order type
-    const [orderType, setOrderType] = useState<"donate" | "pickup">("donate");
+    const initialCartItems = useQuery(api.cart.getUserCartItems)
+
+    // Initialize the cart items state
     useEffect(() => {
-        if(cartItems)
-        {
-            // Default order type will be set to donate if there are both donate and pickup items in the cart 
-            // otherwise it will be whichever has at least one item in the cart
-            if(cartItems.donateItems.length > 0 && cartItems.pickupItems.length > 0) {
-                setOrderType("donate")
-            } else if(cartItems.donateItems.length > 0) {
-                setOrderType("donate")
-            } else {
-                setOrderType("pickup")
-            }
+        if(initialCartItems) {
+            setCartItems(initialCartItems)
         }
-    }, [cartItems])
+    }, [initialCartItems])
 
-    // Use a ref to store the selected date and time while preventing re-rendering
-    const pickupRef = useRef<{ date: Date, time: number } | null>(null)
+    // Update the order draft when the order type, cart items, selected date and time are changed
+    useEffect(() => {
+        if(cartItems) {
+            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
+            props.onOrderDraftChange({
+                orderType: orderType,
+                date: selectedDate ?? undefined,
+                time: selectedTime ?? undefined,
+                cartItems: items,
+            })
+        }
+    }, [orderType, cartItems, selectedDate, selectedTime])
 
-    // Update the order draft when the pickup date and time are changed
+    const handleCartItemsChange = (cartItems: CartItems) => {
+        setCartItems(cartItems)
+    }
+    // Memoize each of the components to handle state changes
+    const donateList = useMemo(() => {
+        if(cartItems) {
+            return (
+                <CartItemList cartItems={cartItems} type="donate" disabled={orderType === "pickup"} onCartItemsChange={handleCartItemsChange} />
+            )
+        }
+        return null
+    }, [cartItems, orderType])
+
+    const pickupList = useMemo(() => {
+        if(cartItems) {
+            return (
+                <CartItemList cartItems={cartItems} type="pickup" disabled={orderType === "donate"} onCartItemsChange={handleCartItemsChange} />
+            )
+        }
+        return null
+    }, [cartItems, orderType])
+
     const handlePickupChange = useCallback((date: Date, time: number) => {
-        pickupRef.current = { date, time }
-        if(cartItems) {
-            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
-            props.onOrderDraftChange({
-                orderType: orderType,
-                date: date,
-                time: time,
-                cartItems: items,
-            })
-        }
+        setSelectedDate(date)
+        setSelectedTime(time)
     }, [])
 
-    // Use a ref to store the cart items while preventing re-rendering
-    const cartItemsRef = useRef<CartItems>(cartItems)
-
-    // Update the order draft when the cart items are changed
-    const handleCartItemsChange = useCallback((cartItems: CartItems) => {
-        console.log("Cart Items Change", cartItems)
-        cartItemsRef.current = cartItems
-        if(cartItems) {
-            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
-            props.onOrderDraftChange({
-                orderType: orderType,
-                date: pickupRef.current?.date,
-                time: pickupRef.current?.time,
-                cartItems: items,
-            })
-        }
+    const pickupScheduler = useMemo(() => {
+        return (
+            <PickupScheduler onChange={handlePickupChange} />
+        )
     }, [])
-
-    // Update the order draft when the order type is changed
-    useEffect(() => {
-        console.log("Order Update")
-        let draft: OrderDraft = {
-            orderType: orderType,
-            date: pickupRef.current?.date,
-            time: pickupRef.current?.time,
-            cartItems: [],
-        }
-        if(cartItems) {
-            const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
-            draft.cartItems = items;
-        }
-        props.onOrderDraftChange(draft)
-    }, [orderType])
-
 
     return (
         <VStack margin={8} gap={8}>
@@ -117,8 +106,8 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
                             {cartItems.donateItems.length > 0 && (
                                 <VStack maxH="500px" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "donate" ? "white" : "#F4F4F5"}>
                                     <Heading size="md" fontWeight="semibold" color={orderType === "donate" ? "black" : "gray.500"}>Donate Items</Heading>
-                                    <Box flex="1" overflowY="auto" width="full">    
-                                        <CartItemList cartItems={cartItems} type="donate" disabled={orderType === "pickup"} onCartItemsChange={handleCartItemsChange} />
+                                    <Box flex="1" overflowY="auto" width="full">
+                                        {donateList}
                                     </Box>
                                 </VStack>
                             )}
@@ -126,7 +115,7 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
                                 <VStack height="full" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "pickup" ? "white" : "#F4F4F5"}>
                                     <Heading size="md" fontWeight="semibold" color={orderType === "pickup" ? "black" : "gray.500"}>Pickup Items</Heading>
                                     <Box flex="1" overflowY="auto" width="full">
-                                        <CartItemList cartItems={cartItems} type="pickup" disabled={orderType === "donate"} onCartItemsChange={handleCartItemsChange} />
+                                        {pickupList}
                                     </Box>
                                 </VStack>
                             )}
@@ -135,7 +124,7 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
                 </HStack>
             </VStack>
             {/* Use a ref to store the selected date and time while preventing re-rendering */}
-            <PickupScheduler onChange={handlePickupChange} />
+            {pickupScheduler}
         </VStack>
     )
 }
