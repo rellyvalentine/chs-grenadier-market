@@ -34,7 +34,7 @@ export default function ItemCard(props: { item: Item }) {
     }
     return (
         <Card.Root>
-            <Image src="https://picsum.photos/275/250" alt={props.item.name} />
+            <Image src="https://picsum.photos/150/125" alt={props.item.name} />
             <Card.Body>
                 <Card.Title>{props.item.name}</Card.Title>
                 <Card.Description>{props.item.description}</Card.Description>
@@ -42,7 +42,7 @@ export default function ItemCard(props: { item: Item }) {
             <Card.Footer>
                 {isAuthenticated ? (
                     <>
-                        <Button onClick={() => handleAddItemToCart("pickup")}>Pickup Item</Button>
+                        <Button variant="outline" onClick={() => handleAddItemToCart("pickup")}>Pickup Item</Button>
                         <Button onClick={() => handleAddItemToCart("donate")}>Donate Item</Button>
                     </>
                 ) : (

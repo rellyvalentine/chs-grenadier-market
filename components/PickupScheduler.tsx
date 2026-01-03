@@ -45,7 +45,7 @@ function getDateRange(): DateRange {
 	for (let i = (today.getDay() === 0 || today.getDay() > 5) ? 1 : 0; i < remainingWeeks; i++) {
 		let weekStart: DateFNS.Day = ((i === 0) ? today.getDay() : 1) as DateFNS.Day // On the current week, get the current day as the week start
 		let startOfWeek = DateFNS.startOfWeek(DateFNS.addWeeks(today, i), { weekStartsOn: weekStart }) // Start of the week for the week (i)th week
-		let endOfWeek = DateFNS.addDays(startOfWeek, 5-weekStart) // End of the week for the week (i)th week
+		let endOfWeek = DateFNS.addDays(startOfWeek, 5 - weekStart) // End of the week for the week (i)th week
 		includeDates.push({
 			start: startOfWeek,
 			end: endOfWeek,
@@ -60,7 +60,7 @@ function getDateRange(): DateRange {
 
 export default function PickupScheduler(props: { onChange: (date: Date, time: number) => void }) {
 	const { excludeDates, includeDates } = getDateRange();
-	const [selectedDate, setSelectedDate] = useState<Date>(includeDates[0].start);
+	const [selectedDate, setSelectedDate] = useState<Date>(includeDates.length > 0 ? includeDates[0].start : new Date());
 	const [selectedTime, setSelectedTime] = useState<number>(0);
 
 	return (
@@ -87,16 +87,23 @@ export default function PickupScheduler(props: { onChange: (date: Date, time: nu
 					/>
 				</VStack>
 				<VStack alignItems="start">
-					<Heading size="md" fontWeight="semibold">
-						Choose a timeslot
-					</Heading>
-					<Timeslots
-						date={selectedDate}
-						onTimeSelect={(time: number) => {
-							setSelectedTime(time);
-							props.onChange(selectedDate, time);
-						}}
-					/>
+					{(excludeDates.at(0)?.end !== selectedDate) ? (
+						<>
+							<Heading size="md" fontWeight="semibold">
+								Choose a timeslot
+							</Heading>
+							<Timeslots
+								date={selectedDate}
+								onTimeSelect={(time: number) => {
+									setSelectedTime(time);
+									props.onChange(selectedDate, time);
+								}}
+							/>
+						</>
+					 ) : (
+						<Heading size="md" fontWeight="semibold">No timeslots available for this date</Heading>
+					 )}
+
 				</VStack>
 			</HStack>
 		</VStack>
