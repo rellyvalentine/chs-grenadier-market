@@ -108,7 +108,7 @@
 .react-datepicker-time__header,
 .react-datepicker-year-header {
   margin-top: 0;
-  color: #000;
+  color: var(--chakra-colors-secondary-950);
   font-weight: bold;
   font-family: "Segoe UI", sans-serif;
   font-size: 18px;
@@ -362,7 +362,7 @@ h2.react-datepicker__current-month {
 .react-datepicker__day-name,
 .react-datepicker__day,
 .react-datepicker__time-name {
-  color: #000;
+  color: var(--chakra-colors-secondary-950);
   display: inline-block;
   width: 2.2rem;
   line-height: 2.2rem;
@@ -492,7 +492,7 @@ h2.react-datepicker__current-month {
 .react-datepicker__year-text--keyboard-selected {
   border-radius: 0.3rem;
   background-color: var(--chakra-colors-primary-200);
-  color: rgb(0, 0, 0);
+  color: var(--chakra-colors-secondary-950);
 }
 .react-datepicker__day--keyboard-selected:not([aria-disabled=true]):hover,
 .react-datepicker__month-text--keyboard-selected:not([aria-disabled=true]):hover,
