@@ -16,10 +16,10 @@ export default function Home() {
   const items = useQuery(api.items.getActiveItems)
 
   return (
-    <VStack bg="#eeeeee" h="100vh" marginLeft="auto" marginRight="auto" gap={12}>
+    <VStack marginLeft="auto" marginRight="auto" gap={12} paddingBottom={36}>
       <Header />
       <VStack maxWidth="1400px" gap={4}>
-        <VStack gap={1}>
+        <VStack gap={1} w="85%">
           <Heading size="2xl" textAlign="center">Welcome to the Grenadier Market</Heading>
           <Text textStyle="body" fontSize="lg" textAlign="center">The online marketplace where CHS students and parents can select available items they need or donate items they have to help others in need.</Text>
           <Text textStyle="body" fontSize="lg" textAlign="center">Add items to your cart and submit an order to pick them up or donate them to the school.</Text>
@@ -36,7 +36,7 @@ export default function Home() {
             </Box>
           </GridItem>
           <GridItem>
-            <Box width="full" display="flex" alignItems="start" paddingY={8} paddingX={12}>
+            <Box width="full" display="flex" alignItems="start" paddingY={8} paddingX={8}>
               <ItemList items={items} />
             </Box>
             <GridItem /> {/* Empty grid item to push the filter selector to the left */}

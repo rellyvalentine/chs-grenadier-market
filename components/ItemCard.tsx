@@ -34,7 +34,7 @@ export default function ItemCard(props: { item: Item }) {
         }
     }
     return (
-        <Card.Root maxWidth="xs" borderColor="secondary.400" borderBottom="4px solid" borderBottomColor="secondary.400" borderRadius="xl" overflow="hidden" shadow="md">
+        <Card.Root transform="scale(0.85)" transformOrigin="top" maxWidth="xs" borderColor="secondary.400" borderBottom="4px solid" borderBottomColor="secondary.400" borderRadius="xl" overflow="hidden" shadow="md">
             <Image src="https://picsum.photos/100/75" alt={props.item.name} />
             <Card.Body>
                 <Card.Title>{props.item.name}</Card.Title>

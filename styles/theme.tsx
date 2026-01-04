@@ -3,7 +3,7 @@ import { createSystem, defineConfig, defaultConfig, defineRecipe, defineTextStyl
 export const textStyles = defineTextStyles({
   heading: {
     value: {
-      fontFamily: "Segoe UI",
+      fontFamily: "Segoe UI, sans-serif",
       fontWeight: "bold",
       fontSize: "4xl",
       letterSpacing: "tight",
@@ -13,7 +13,7 @@ export const textStyles = defineTextStyles({
   },
   body: {
     value: {
-      fontFamily: "Segoe UI",
+      fontFamily: "Segoe UI, sans-serif",
       fontWeight: "normal",
       fontSize: "lg",
       letterSpacing: "normal",
@@ -23,6 +23,13 @@ export const textStyles = defineTextStyles({
 })
 
 export const customConfig = defineConfig({
+  globalCss: {
+    body: {
+      bg: "#FAFBFC",
+      fontFamily: "Segoe UI, sans-serif",
+      color: "secondary.950",
+    },
+  },
   theme: {
     tokens: {
       colors: {

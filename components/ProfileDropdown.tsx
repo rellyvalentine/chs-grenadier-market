@@ -12,14 +12,14 @@ export default function ProfileDropdown() {
         <Menu.Root>
             {user ? (
                 <Menu.Trigger>
-                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Profile</Text>
                         <Icon as={FaUser} />
                     </IconButton>
                 </Menu.Trigger>
             ) : (
                 <LoginTrigger>
-                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Profile</Text>
                         <Icon as={FaUser} />
                     </IconButton>

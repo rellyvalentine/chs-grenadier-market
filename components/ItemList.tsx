@@ -6,9 +6,9 @@ import ItemCard from "./ItemCard";
 
 export default function ItemList(props: { items: Item[] | undefined }) {
     return (
-        <Wrap justify="center" gap={8}>
+        <Wrap justify="center" align="start" gap={4}>
             {props.items?.map((item) => (
-                <WrapItem key={item.name}>
+                <WrapItem  display="flex" alignItems="start" justifyContent="center" key={item.name}>
                     <ItemCard item={item} />
                 </WrapItem>
             ))}

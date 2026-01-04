@@ -1,6 +1,7 @@
-import { Heading, HStack, VStack } from "@chakra-ui/react";
+import { Grid, GridItem, Heading, HStack, VStack } from "@chakra-ui/react";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// import "react-datepicker/dist/react-datepicker.css";
+import "@/styles/date-picker.css";
 import Timeslots from "./Timeslots";
 import * as DateFNS from "date-fns";
 import { useState } from "react";
@@ -65,47 +66,51 @@ export default function PickupScheduler(props: { onChange: (date: Date, time: nu
 
 	return (
 		<VStack width="full" gap={2}>
-			<Heading size="lg">Select the pickup date and time</Heading>
-			<HStack width="full" justify="space-evenly" align="stretch" gap={20}>
-				<VStack alignItems="start">
-					<Heading size="md" fontWeight="semibold">
-						Choose a date
-					</Heading>
-					<DatePicker
-						selected={selectedDate}
-						onChange={(date: Date | null) => {
-							if (date) {
-								// Set the datetime to the start of the selected day
-								date.setHours(0, 0, 0, 0);
-								setSelectedDate(date);
-								props.onChange(date, selectedTime);
-							}
-						}}
-						excludeDateIntervals={excludeDates}
-						includeDateIntervals={includeDates}
-						inline
-					/>
-				</VStack>
-				<VStack alignItems="start">
-					{(excludeDates.at(0)?.end !== selectedDate) ? (
-						<>
-							<Heading size="md" fontWeight="semibold">
-								Choose a timeslot
-							</Heading>
-							<Timeslots
-								date={selectedDate}
-								onTimeSelect={(time: number) => {
-									setSelectedTime(time);
-									props.onChange(selectedDate, time);
-								}}
-							/>
-						</>
-					 ) : (
-						<Heading size="md" fontWeight="semibold">No timeslots available for this date</Heading>
-					 )}
+			<Heading size="xl" fontWeight="semibold">Select the pickup date and time</Heading>
+			<Grid templateColumns="1fr 1fr" gap={20}>
+				<GridItem>
+					<VStack alignItems="center">
+						<Heading size="md" fontWeight="semibold">
+							Choose a date
+						</Heading>
+						<DatePicker
+							selected={selectedDate}
+							onChange={(date: Date | null) => {
+								if (date) {
+									// Set the datetime to the start of the selected day
+									date.setHours(0, 0, 0, 0);
+									setSelectedDate(date);
+									props.onChange(date, selectedTime);
+								}
+							}}
+							excludeDateIntervals={excludeDates}
+							includeDateIntervals={includeDates}
+							inline
+						/>
+					</VStack>
+				</GridItem>
+				<GridItem>
+					<VStack alignItems="center">
+						{(excludeDates.at(0)?.end !== selectedDate) ? (
+							<>
+								<Heading size="md" fontWeight="semibold">
+									Choose a timeslot
+								</Heading>
+								<Timeslots
+									date={selectedDate}
+									onTimeSelect={(time: number) => {
+										setSelectedTime(time);
+										props.onChange(selectedDate, time);
+									}}
+								/>
+							</>
+						) : (
+							<Heading size="md" fontWeight="semibold">No timeslots available for this date</Heading>
+						)}
 
-				</VStack>
-			</HStack>
+					</VStack>
+				</GridItem>
+			</Grid>
 		</VStack>
 	);
 }

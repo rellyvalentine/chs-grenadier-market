@@ -97,17 +97,17 @@ export default function CartModal() {
     }
 
     return (
-        <Dialog.Root  size="xl" open={open} onOpenChange={(e) => setOpen(e.open)}>
+        <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
             {isAuthenticated ? (
                 <Dialog.Trigger>
-                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Cart</Text>
                         <Icon as={FaShoppingCart} />
                     </IconButton>
                 </Dialog.Trigger>
             ) : (
                 <LoginTrigger>
-                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Cart</Text>
                         <Icon as={FaShoppingCart} />
                     </IconButton>
@@ -116,9 +116,9 @@ export default function CartModal() {
             <Portal>
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
-                    <Dialog.Content>
+                    <Dialog.Content maxW="1400px" padding={4}>
                         <Dialog.Header>
-                            <Dialog.Title>Your Cart</Dialog.Title>
+                            <Dialog.Title fontSize="3xl" fontWeight="semibold">Your Cart</Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body>
                             <Cart onOrderDraftChange={handleDraftChange} />
@@ -127,7 +127,7 @@ export default function CartModal() {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button onClick={handleSubmit}>Confirm</Button>
+                            <Button onClick={handleSubmit}>Submit Order</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton />
