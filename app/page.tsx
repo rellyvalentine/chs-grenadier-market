@@ -5,21 +5,44 @@ import { api } from "../convex/_generated/api";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { Grid, VStack, Text } from "@chakra-ui/react";
+import { Grid, VStack, Text, GridItem, Box, Heading } from "@chakra-ui/react";
 import ItemList from "@/components/ItemList";
-import CartModal from "@/components/CartModal";
 import Header from "@/components/Header";
+import FilterSelector from "@/components/FilterSelector";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
 
-const items = useQuery(api.items.getActiveItems)
+  const items = useQuery(api.items.getActiveItems)
 
   return (
-    <VStack margin="auto" maxWidth="1200px" gap={8}>
+    <VStack bg="#eeeeee" h="100vh" marginLeft="auto" marginRight="auto" gap={12}>
       <Header />
-      <Text>Welcome to the Grenadier Market</Text>
-      <Text textAlign="center">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sed mi ut odio pellentesque malesuada. Phasellus eleifend enim vel dolor cursus porta. Integer pharetra urna a accumsan rutrum. Donec quam massa, tempor in sollicitudin semper, auctor maximus tortor. Cras dapibus accumsan lectus sit amet pulvinar. Etiam consectetur ligula augue, at dignissim diam elementum a. Mauris at nisi hendrerit, facilisis nulla non, consectetur dui. Suspendisse non orci eu nibh iaculis elementum.</Text>
-      <ItemList items={items} />
+      <VStack maxWidth="1400px" gap={4}>
+        <VStack gap={1}>
+          <Heading size="2xl" textAlign="center">Welcome to the Grenadier Market</Heading>
+          <Text textStyle="body" fontSize="lg" textAlign="center">The online marketplace where CHS students and parents can select available items they need or donate items they have to help others in need.</Text>
+          <Text textStyle="body" fontSize="lg" textAlign="center">Add items to your cart and submit an order to pick them up or donate them to the school.</Text>
+        </VStack>
+        <VStack margin={8} gap={1}>
+          <Text textStyle="body" fontSize="lg" textAlign="center" fontWeight="medium">Don't see an item you need or would like to donate?</Text>
+          <Text textStyle="body" fontSize="lg" textAlign="center" fontWeight="medium">Submit a request to add it to the market.</Text>
+          <Button variant="solid">Request Item</Button>
+        </VStack>
+        <Grid templateColumns="1fr auto 1fr" alignItems="start" width="full">
+          <GridItem>
+            <Box width="full" display="flex" alignItems="start" p={8}>
+              <FilterSelector />
+            </Box>
+          </GridItem>
+          <GridItem>
+            <Box width="full" display="flex" alignItems="start" paddingY={8} paddingX={12}>
+              <ItemList items={items} />
+            </Box>
+            <GridItem /> {/* Empty grid item to push the filter selector to the left */}
+          </GridItem>
+        </Grid>
+      </VStack>
     </VStack>
   )
 }

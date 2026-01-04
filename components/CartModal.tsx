@@ -1,4 +1,4 @@
-import { Button, CloseButton, Dialog, Icon, IconButton, Portal } from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Icon, IconButton, Portal, Text } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster"
 import { FaShoppingCart } from "react-icons/fa";
 import { useCallback, useRef, useState } from "react";
@@ -100,13 +100,15 @@ export default function CartModal() {
         <Dialog.Root  size="xl" open={open} onOpenChange={(e) => setOpen(e.open)}>
             {isAuthenticated ? (
                 <Dialog.Trigger>
-                    <IconButton aria-label="Open Cart" variant="ghost">
+                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                        <Text fontWeight="bold" fontSize="md">Cart</Text>
                         <Icon as={FaShoppingCart} />
                     </IconButton>
                 </Dialog.Trigger>
             ) : (
                 <LoginTrigger>
-                    <IconButton aria-label="Open Cart" variant="ghost">
+                    <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                        <Text fontWeight="bold" fontSize="md">Cart</Text>
                         <Icon as={FaShoppingCart} />
                     </IconButton>
                 </LoginTrigger>

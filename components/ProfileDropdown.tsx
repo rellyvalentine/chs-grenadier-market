@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api"
-import { Icon, IconButton, Menu } from "@chakra-ui/react"
+import { Icon, IconButton, Menu, Text } from "@chakra-ui/react"
 import { useQuery } from "convex/react"
 import { FaUser } from "react-icons/fa"
 import LoginTrigger from "./LoginTrigger"
@@ -12,13 +12,15 @@ export default function ProfileDropdown() {
         <Menu.Root>
             {user ? (
                 <Menu.Trigger>
-                    <IconButton aria-label="Open Profile" variant="ghost">
+                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                        <Text fontWeight="bold" fontSize="md">Profile</Text>
                         <Icon as={FaUser} />
                     </IconButton>
                 </Menu.Trigger>
             ) : (
                 <LoginTrigger>
-                    <IconButton aria-label="Open Profile" variant="ghost">
+                    <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} _hover={{ bg: "#EDEEF1" }}>
+                        <Text fontWeight="bold" fontSize="md">Profile</Text>
                         <Icon as={FaUser} />
                     </IconButton>
                 </LoginTrigger>
