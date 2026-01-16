@@ -1,3 +1,4 @@
+import OrderList from "@/components/OrderList";
 import OrderTable from "@/components/OrderTable";
 import { Grid, GridItem, Heading, Table, VStack } from "@chakra-ui/react";
 
@@ -5,17 +6,15 @@ import { Grid, GridItem, Heading, Table, VStack } from "@chakra-ui/react";
 
 export default function OrderSection() {
     return (
-        <VStack w="full">
-            <Heading size="2xl">Orders</Heading>
-            <Grid templateColumns="1fr 1fr" gap={12}>
-                <GridItem>
-                    <Heading>Upcoming Orders</Heading>
-                </GridItem>
-                <GridItem>
-                    <Heading>Past Orders</Heading>
-                    <OrderTable />
-                </GridItem>
-            </Grid>
+        <VStack justifyContent="center" w="full" gap={12}  bg="white" borderRadius={4} p={4}>
+            <VStack alignItems="start" w="full" gap={4}>
+                <Heading>Upcoming Orders</Heading>
+                <OrderList />
+            </VStack>
+            <VStack alignItems="start" w="full" gap={4}>
+                <Heading>Past Orders</Heading>
+                <OrderTable />
+            </VStack>
         </VStack>
     )
 }
