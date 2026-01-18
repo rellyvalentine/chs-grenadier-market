@@ -28,9 +28,9 @@ export default function OrderList() {
     ]
 
     return (
-        <Wrap>
+        <Wrap gap={2}>
             {orders.map((order) => (
-                <WrapItem key={order._id}>
+                <WrapItem key={order._id} display="flex" alignItems="start" justifyContent="center">
                     <OrderCard order={order as Order} />
                 </WrapItem>
             ))}

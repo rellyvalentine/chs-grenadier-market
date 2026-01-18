@@ -3,10 +3,10 @@
 import { Box, Button, Dialog, Grid, GridItem, HStack, Portal, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api";
-import OrderSection from "../../components/OrderSection";
+import OrderSection from "@/components/OrderSection";
 import Sidebar from "@/components/Sidebar";
 
-export default function AdminPage() {
+export default function OrderPage() {
 
 
     const user = useQuery(api.users.getCurrentUser);

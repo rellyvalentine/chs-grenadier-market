@@ -1,12 +1,13 @@
 import { Order } from "@/utils/types";
 import { Badge, Box, Button, Card, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import OrderModal from "./OrderModal";
 
 
 
 export default function OrderCard(props: { order: Order }) {
     const { order } = props;
     return (
-        <Card.Root size="md" w="300px" borderColor="secondary.200" borderBottom="4px solid" borderBottomColor="secondary.200" borderRadius="xl">
+        <Card.Root transform="scale(0.85)" transformOrigin="top left" size="md" w="300px" borderColor="secondary.200" borderBottom="4px solid" borderBottomColor="secondary.200" borderRadius="xl" overflow="hidden">
             <Card.Header>
                 <HStack justify="space-between" alignItems="start">
                     <VStack alignItems="start">
@@ -20,16 +21,16 @@ export default function OrderCard(props: { order: Order }) {
                 <VStack w="full" alignItems="start" justifyContent="space-between">
                     <HStack justify="space-between" w="full">
                         <VStack gap={0} alignItems="start">
-                            <Heading size="lg" fontWeight="medium">{new Date(order.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Heading>
-                            <Heading size="xl" fontWeight="medium">{new Date(order.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</Heading>
+                            <Heading size="lg" fontWeight="500">{new Date(order.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Heading>
+                            <Heading size="2xl" fontWeight="700">{new Date(order.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</Heading>
                         </VStack>
                         {/* <Text fontSize="lg" fontWeight="medium">3 Items</Text> */}
                     </HStack>
-                    <Box minH="45px" w="full">
-                        <Button w="full">View Order</Button>
-                    </Box>
                 </VStack>
             </Card.Body>
+            <Card.Footer>
+                <OrderModal order={order} />
+            </Card.Footer>
         </Card.Root>
     )
 }

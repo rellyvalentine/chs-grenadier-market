@@ -6,7 +6,7 @@ import { Grid, GridItem, Heading, Table, VStack } from "@chakra-ui/react";
 
 export default function OrderSection() {
     return (
-        <VStack justifyContent="center" w="full" gap={12}  bg="white" borderRadius={4} p={4}>
+        <VStack justifyContent="center" w="full" gap={12} p={4}>
             <VStack alignItems="start" w="full" gap={4}>
                 <Heading>Upcoming Orders</Heading>
                 <OrderList />
