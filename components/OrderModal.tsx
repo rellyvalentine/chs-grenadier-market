@@ -7,6 +7,7 @@ import LoginTrigger from "./LoginTrigger";
 import { useConvexAuth, useMutation } from "convex/react";
 import { Order, OrderDraft } from "@/utils/types";
 import { api } from "@/convex/_generated/api";
+import OrderManager from "./OrderManager";
 
 
 
@@ -14,9 +15,11 @@ export default function OrderModal(props: { order: Order }) {
     const { order } = props;
     const [open, setOpen] = useState<boolean>(false)
 
+    // retrieve cart items from the order
+
     return (
-        <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-            <Dialog.Trigger>
+        <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)} size="lg">
+            <Dialog.Trigger w="full">
                 <Box minH="45px" w="full" display="flex" alignItems="end">
                     <Button w="full">View Order</Button>
                 </Box>
@@ -24,18 +27,18 @@ export default function OrderModal(props: { order: Order }) {
             <Portal>
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
-                    <Dialog.Content maxW="1400px" padding={4}>
+                    <Dialog.Content padding={4}>
                         <Dialog.Header>
                             <Dialog.Title fontSize="3xl" fontWeight="semibold">Order#{order._id}</Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body>
-                            
+                            <OrderManager order={order} />
                         </Dialog.Body>
                         <Dialog.Footer>
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button>Update Order Status</Button>
+                            <Button>Update Order</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton />
