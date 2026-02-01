@@ -83,25 +83,33 @@ export default defineSchema({
   .index("by_cart_item_and_type", ["cartId", "itemId", "type"]),
 
   orders: defineTable({
+    orderNumber: v.number(),
     userId: v.id("users"),
     orderType: v.union(v.literal("donate"), v.literal("pickup")),
     date: v.number(),
     time: v.number(),
     status: v.union(v.literal("pending"), v.literal("fulfilled"), v.literal("cancelled")),
+    updatedAt: v.number(),
+    updatedBy: v.id("users"),
   })
   .index("by_user", ["userId"])
   .index("by_order_type", ["orderType"])
   .index("by_date", ["date"])
   .index("by_time", ["time"])
   .index("by_date_and_time", ["date", "time"])
-  .index("by_status", ["status"]),
+  .index("by_status", ["status"])
+  .index("by_status_and_date", ["status", "date"]),
 
   orderItems: defineTable({
     orderId: v.id("orders"),
     itemId: v.id("items"),
     quantity: v.number(),
   })
-  .index("by_order_item", ["orderId", "itemId"])
+  .index("by_order_item", ["orderId", "itemId"]),
 
-  
+  orderCounter: defineTable({
+    key: v.literal("stats"),
+    count: v.number(),
+  })
+  .index("by_key", ["key"]),
 });

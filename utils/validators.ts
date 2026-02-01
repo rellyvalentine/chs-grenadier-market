@@ -36,3 +36,11 @@ export const cartItemValidator = v.object({
     type: v.union(v.literal("donate"), v.literal("pickup")),
     selected: v.boolean(),
 })
+
+export const orderItemValidator = v.object({
+    _id: v.id("orderItems"),
+    orderId: v.id("orders"),
+    itemId: v.id("items"),
+    quantity: v.number(),
+    _creationTime: v.number(),
+})

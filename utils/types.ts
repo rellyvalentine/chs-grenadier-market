@@ -8,6 +8,12 @@ export enum ItemCategories {
     OTHER = "Other"
 }
 
+export enum OrderStatus {
+    PENDING = "pending",
+    FULFILLED = "fulfilled",
+    CANCELLED = "cancelled"
+}
+
 export type Item = {
     _id: Id<"items">;
     _creationTime: number;
@@ -41,11 +47,12 @@ export type Timeslot = {
 
 export type Order = {
     _id: Id<"orders">;
+    orderNumber: number;
     userId: Id<"users">;
     orderType: "donate" | "pickup";
     date: number;
     time: number;
-    status: "pending" | "fulfilled" | "cancelled";
+    status: OrderStatus;
     updatedAt: number;
     updatedBy: Id<"users">;
 }
@@ -55,4 +62,20 @@ export type OrderDraft = {
     date: Date | undefined;
     time: number | undefined;
     cartItems: CartItem[];
+}
+
+export type OrderItem = {
+    _id: Id<"orderItems">;
+    orderId: Id<"orders">;
+    itemId: Id<"items">;
+    quantity: number;
+    _creationTime: number;
+}
+
+export type User = {
+    _id: Id<"users">;
+    email: string | undefined;
+    name: string | undefined;
+    phone: string | undefined;
+    role: string | undefined;
 }

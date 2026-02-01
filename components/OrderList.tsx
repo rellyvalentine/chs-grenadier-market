@@ -1,39 +1,23 @@
 import OrderCard from "./OrderCard";
-import { Wrap, WrapItem } from "@chakra-ui/react";
-import { Order } from "@/utils/types";
+import { Wrap, WrapItem, Text } from "@chakra-ui/react";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 export default function OrderList() {
 
-    const orders = [
-        {
-            _id: "1",
-            userId: "1",
-            orderType: "donate",
-            date: 1715769600000,
-            time: 100000,
-            status: "pending",
-            updatedAt: 1715769600000,
-            updatedBy: "123",
-        },
-        {
-            _id: "2",
-            userId: "2",
-            orderType: "pickup",
-            date: 1715769600000,
-            time: 100000,
-            status: "pending",
-            updatedAt: 1715769600000,
-            updatedBy: "123",
-        },
-    ]
+    const upcomingOrders = useQuery(api.orders.getUpcomingOrders);
 
     return (
-        <Wrap gap={2}>
-            {orders.map((order) => (
-                <WrapItem key={order._id} display="flex" alignItems="start" justifyContent="center">
-                    <OrderCard order={order as Order} />
-                </WrapItem>
-            ))}
-        </Wrap>
-    );
+        (upcomingOrders && upcomingOrders.length > 0 ? (
+            <Wrap gap={2}>
+                {upcomingOrders.map((order) => (
+                    <WrapItem key={order._id} display="flex" alignItems="start" justifyContent="center">
+                        <OrderCard order={order} />
+                    </WrapItem>
+                ))}
+            </Wrap>
+        ) : (
+            <Text>There are no upcoming orders</Text>
+        ))
+    )
 }

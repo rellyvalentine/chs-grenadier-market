@@ -1,3 +1,4 @@
+import { OrderStatus } from "@/utils/types";
 import { createListCollection, Portal, Select } from "@chakra-ui/react";
 
 
@@ -9,10 +10,21 @@ const orderStates = createListCollection({
     ],
 })
 
-export default function StatusSelector(props: { status: string }) {
-    const { status } = props;
+function isStatusValid(status: string): status is OrderStatus {
+    return Object.values(OrderStatus).includes(status as OrderStatus)
+}
+
+export default function StatusSelector(props: { status: OrderStatus, onStatusChange: (status: OrderStatus) => void }) {
+    const { status, onStatusChange } = props;
+
+    const handleStatusChange = (status: string | undefined) => {
+        if(status && isStatusValid(status)) {
+            onStatusChange(status)
+        }
+    }
+
     return (
-        <Select.Root collection={orderStates} size="sm" width="220px">
+        <Select.Root collection={orderStates} size="sm" width="220px" onValueChange={(e) => {handleStatusChange(e.value.at(0))}}>
             <Select.HiddenSelect />
             <Select.Control>
                 <Select.Trigger>

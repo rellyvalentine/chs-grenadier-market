@@ -1,33 +1,55 @@
 import { GridItem, Grid, Table, Input, Button, HStack, Menu, IconButton, Text, Icon } from "@chakra-ui/react";
 import { HiSortAscending, HiOutlineEye } from "react-icons/hi";
 import DateRangeSelector from "./DateRangeSelector";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
+import { Id } from "@/convex/_generated/dataModel";
+import { Order, User } from "@/utils/types";
+import { FaPenToSquare } from "react-icons/fa6";
+import OrderModal from "./OrderModal";
 
-const orders = [
-    { id: 1, type: "donate", items: 2, user: "student", name: "John Doe", date: 1715769600000, time: 100000, lastUpdate: "2024-01-01", status: "pending" },
-    { id: 2, type: "pickup", items: 1, user: "parent", name: "Jane Doe", date: 1715769600000, time: 100000, lastUpdate: "2024-01-01", status: "fulfilled" },
-    { id: 3, type: "donate", items: 3, user: "student", name: "John Smith", date: 1715769600000, time: 100000, lastUpdate: "2024-01-01", status: "cancelled" },
-    { id: 4, type: "pickup", items: 4, user: "parent", name: "Jane Smith", date: 1715769600000, time: 100000, lastUpdate: "2024-01-01", status: "pending" },
-    { id: 5, type: "donate", items: 5, user: "student", name: "John Doe", date: 1715769600000, time: 100000, lastUpdate: "2024-01-01", status: "fulfilled" },
-]
+const MILLISECONDS_PER_SECOND = 1000
+const SECONDS_PER_MINUTE = 60
+const MINUTES_PER_HOUR = 60
+
+function getStartDate() {
+    const currentDate = new Date(Date.now()).getTime()
+    const sevenDaysAgo = currentDate - 7 * 24 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND
+    return sevenDaysAgo
+}
+
+function getEndDate() {
+    const currentDate = new Date(Date.now()).getTime()
+    const sevenDaysFromNow = currentDate + 7 * 24 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND
+    return sevenDaysFromNow
+}
 
 export default function OrderTable() {
 
-    const [startDate, setStartDate] = useState<Date | null>(new Date());
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const defaultStartDate = useMemo(() => new Date(getStartDate()), []);
+    const defaultEndDate = useMemo(() => new Date(getEndDate()), []);
+
+    const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
+    const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
 
     const onChange = (dates: [Date | null, Date | null]) => {
         const [start, end] = dates;
-        setStartDate(start);
-        setEndDate(end);
+        setStartDate(prev => prev?.getTime() === start?.getTime() ? prev : start);
+        setEndDate(prev => prev?.getTime() === end?.getTime() ? prev : end);
     }
 
-    // Filter orders by date range
-    const filteredOrders = orders.filter((order) => {
-        if (!startDate || !endDate) return true;
-        const orderDate = new Date(order.date);
-        return orderDate >= startDate && orderDate <= endDate;
-    });
+    const pastOrders = useQuery(api.orders.getPastOrders, { startDate: startDate?.getTime(), endDate: endDate?.getTime() }) || []
+    // Memoize the user ids to avoid re-fetching the users for each order
+    const userIds = useMemo(() => pastOrders.map((order) => order.userId), [pastOrders]);
+
+    const users = useQuery(api.users.getUsers, { userIds: userIds }) || []
+    
+    const userMap = users.reduce<Record<Id<"users">, User>>((acc, user) => {
+        acc[user._id] = user
+        return acc
+    }, {})
+
 
     return (
         <Grid w="full" templateColumns="1fr 1fr" templateRows="auto auto" border="1px solid" borderColor="gray.200" borderRadius="md">
@@ -62,28 +84,23 @@ export default function OrderTable() {
                             <Table.ColumnHeader>Type</Table.ColumnHeader>
                             <Table.ColumnHeader>Scheduled Date</Table.ColumnHeader>
                             <Table.ColumnHeader>Scheduled Time</Table.ColumnHeader>
-                            <Table.ColumnHeader>Items</Table.ColumnHeader>
                             <Table.ColumnHeader>Last Update</Table.ColumnHeader>
                             <Table.ColumnHeader>Status</Table.ColumnHeader>
+                            <Table.ColumnHeader>Actions</Table.ColumnHeader>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {orders.map((order) => (
-                            <Table.Row key={order.id} fontWeight="medium">
-                                <Table.Cell>#{order.id}</Table.Cell>
-                                <Table.Cell>{order.name}</Table.Cell>
-                                <Table.Cell>{order.user.charAt(0).toUpperCase() + order.user.slice(1)}</Table.Cell>
-                                <Table.Cell>{order.type.charAt(0).toUpperCase() + order.type.slice(1)}</Table.Cell>
+                        {pastOrders?.map((order) => (
+                            <Table.Row key={order._id} fontWeight="medium">
+                                <Table.Cell>#{order.orderNumber.toString().padStart(4, '0')}</Table.Cell>
+                                <Table.Cell>{userMap[order.userId]?.name}</Table.Cell>
+                                <Table.Cell>{userMap[order.userId]?.role ? userMap[order.userId]?.role : "Unknown"}</Table.Cell>
+                                <Table.Cell>{order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1)}</Table.Cell>
                                 <Table.Cell>{new Date(order.date).toLocaleDateString()}</Table.Cell>
                                 <Table.Cell>{new Date(order.time).toLocaleTimeString()}</Table.Cell>
-                                <Table.Cell>
-                                    <HStack>
-                                        <IconButton as={HiOutlineEye} variant="ghost" size="2xs" />
-                                        <Text>{order.items} Items</Text>
-                                    </HStack>
-                                </Table.Cell>
-                                <Table.Cell>{order.lastUpdate}</Table.Cell>
-                                <Table.Cell>{order.status}</Table.Cell>
+                                <Table.Cell>{new Date(order.updatedAt).toLocaleString()}</Table.Cell>
+                                <Table.Cell>{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</Table.Cell>
+                                <Table.Cell><OrderModal order={order} variant="table" /></Table.Cell>
                             </Table.Row>
                         ))}
                     </Table.Body>
