@@ -17,8 +17,9 @@ export const createItem = mutation({
     args: {
         name: v.string(),
         description: v.string(),
-        // image: v.string(),
+        image: v.id("_storage"),
         category: v.string(),
+        quantity: v.number(),
     },
     handler: async (ctx, args) => {
         const user = await ctx.runQuery(api.users.getCurrentUser)
@@ -29,12 +30,30 @@ export const createItem = mutation({
             throw new Error("Not authorized to perform this action")
         }
 
-        return await ctx.db.insert("items", { name: args.name, description: args.description, category: args.category, isActive: true, quantity: 0 });
+        return await ctx.db.insert("items", { name: args.name, description: args.description, category: args.category, isActive: true, quantity: args.quantity, image: args.image });
     }
+});
+
+export const generateUploadUrl = mutation({
+    args: {},
+    handler: async (ctx) => {
+      return await ctx.storage.generateUploadUrl();
+    },
 });
 
 
 /// QUERIES
+
+export const getItems = query({
+    handler: async (ctx) => {
+        const items = await ctx.db.query("items").collect() as Item[]
+        const itemsWithImage = await Promise.all(items.map(async (item) => ({
+            ...item,
+            image: item.image ? await ctx.storage.getUrl(item.image) : null,
+        })))
+        return itemsWithImage
+    }
+});
 
 /**
  * Get all active items for users to see

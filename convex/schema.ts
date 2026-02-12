@@ -49,7 +49,7 @@ export default defineSchema({
     name: v.string(),
     description: v.string(),
     quantity: v.number(),
-    // image: v.string(),
+    image: v.id("_storage"),
     category: v.string(),
     isActive: v.boolean(),
     deletedAt: v.optional(v.number())

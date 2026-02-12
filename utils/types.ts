@@ -23,6 +23,7 @@ export type Item = {
     quantity: number;
     category: string;
     isActive: boolean;
+    image: string | null;
 }
 
 export type CartItem = {
