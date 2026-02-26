@@ -61,12 +61,12 @@ export default function OrderTable() {
                 <HStack w="full" justifyContent="end">
                     <DateRangeSelector startDate={startDate} endDate={endDate} onChange={onChange} />
                     <Menu.Root>
-                        <Menu.Trigger>
+                        <Menu.Trigger asChild>
                             <Button size="xs">Status</Button>
                         </Menu.Trigger>
                     </Menu.Root>
                     <Menu.Root>
-                        <Menu.Trigger>
+                        <Menu.Trigger asChild>
                             <Button size="xs">
                                 <HiSortAscending /> Sort
                             </Button>

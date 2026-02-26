@@ -99,7 +99,7 @@ export default function CartModal() {
     return (
         <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
             {isAuthenticated ? (
-                <Dialog.Trigger>
+                <Dialog.Trigger asChild>
                     <IconButton aria-label="Open Cart" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Cart</Text>
                         <Icon as={FaShoppingCart} />

@@ -43,6 +43,7 @@ export default defineSchema({
    * @param quantity - Quantity of the item
    * @param category - Category of the item
    * @param isActive - Whether the item is active
+   * @param limit - Limit of the item (how many can be picked up per order)
    * @param deletedAt - Time of deletion
    */
   items: defineTable({
@@ -51,6 +52,7 @@ export default defineSchema({
     quantity: v.number(),
     image: v.id("_storage"),
     category: v.string(),
+    limit: v.number(),
     isActive: v.boolean(),
     deletedAt: v.optional(v.number())
   }),

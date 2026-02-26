@@ -5,7 +5,13 @@ import { Id } from "../convex/_generated/dataModel";
 export enum ItemCategories {
     FOOD = "Food",
     CLOTHING = "Clothing",
+    SUPPLIES = "Supplies",
     OTHER = "Other"
+}
+
+export enum ItemStatus {
+    ACTIVE = "Active",
+    INACTIVE = "Inactive"
 }
 
 export enum OrderStatus {
@@ -21,6 +27,7 @@ export type Item = {
     name: string;
     description: string;
     quantity: number;
+    limit: number;
     category: string;
     isActive: boolean;
     image: string | null;

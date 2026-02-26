@@ -1,5 +1,5 @@
 import { OrderItem } from "@/utils/types";
-import { VStack, Text, Box, Checkbox, Grid, GridItem, HStack, Image } from "@chakra-ui/react";
+import { VStack, Text, Box, Checkbox, Grid, GridItem, HStack, Image, Skeleton } from "@chakra-ui/react";
 import CartItemQuantity from "./CartItemQuantity";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -22,7 +22,11 @@ export default function OrderItemEntry(props: { orderItem: OrderItem, onOrderIte
 
             <GridItem display="flex" alignItems="center">
                 <Box flex="0 0 100px">
-                    <Image src="https://picsum.photos/200" alt={item?.name} width={100} height={100} />
+                    {item?.image ? (
+                        <Image src={item.image} alt={item.name} width={100} height={100} />
+                    ) : (
+                        <Skeleton width={100} height={100} />
+                    )}
                 </Box>
             </GridItem>
 

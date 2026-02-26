@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Item } from "@/utils/types";
-import { Card, Image } from "@chakra-ui/react"; 
+import { Box, Card, Image, Skeleton } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button"
 import { Toaster, toaster } from "@/components/ui/toaster"
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
@@ -9,33 +9,41 @@ import LoginTrigger from "./LoginTrigger";
 
 
 export default function ItemCard(props: { item: Item }) {
-    
+
     const { isAuthenticated } = useConvexAuth()
 
     const addItemToCart = useMutation(api.cart.addItemToCart)
     const handleAddItemToCart = async (type: "pickup" | "donate") => {
-        const cartItemId = await addItemToCart({
+
+        const result = await addItemToCart({
             itemId: props.item._id,
             type: type,
         })
-        console.log(cartItemId)
-        if (cartItemId) {
+        console.log(result)
+        if (result.success) {
             toaster.create({
                 title: "Item added to cart",
-                description: "You can now checkout your cart",
+                description: "You can view the item in your cart",
                 type: "success",
             })
         } else {
             toaster.create({
                 title: "Failed to add item to cart",
-                description: "Please try again",
+                description: result.message,
                 type: "error",
             })
         }
     }
+
     return (
         <Card.Root transform="scale(0.85)" transformOrigin="top" maxWidth="xs" borderColor="secondary.400" borderBottom="4px solid" borderBottomColor="secondary.400" borderRadius="xl" overflow="hidden" shadow="md">
-            <Image src="https://picsum.photos/100/75" alt={props.item.name} />
+            <Box w="full" h="250px">
+                {(props.item.image !== null) ? (
+                    <Image objectFit="cover" src={props.item.image} alt={props.item.name} w="full" h="full" />
+                ) : (
+                    <Skeleton objectFit="cover" w="full" h="full" />
+                )}
+            </Box>
             <Card.Body>
                 <Card.Title>{props.item.name}</Card.Title>
                 <Card.Description>{props.item.description}</Card.Description>

@@ -63,6 +63,11 @@ export const updateOrder = mutation({
         // Update the order items
         await ctx.runMutation(internal.orders.updateOrderItems, { orderId: args.orderId, orderItems: args.orderItems })
 
+        // Update the item quantities from the order items when the order is fulfilled
+        if(args.orderStatus === "fulfilled") {
+            await ctx.runMutation(internal.orders.updateItemQuantities, { orderId: args.orderId })
+        }
+
         // Update the order status
         await ctx.db.patch(args.orderId, { status: args.orderStatus , updatedAt: new Date(Date.now()).getTime(), updatedBy: user._id })
 
@@ -85,6 +90,20 @@ export const updateOrderItems = internalMutation({
     }
 })
 
+export const updateItemQuantities = internalMutation({
+    args: {
+        orderId: v.id("orders"),
+    },
+    handler: async (ctx, args) => {
+        const orderItems = await ctx.db.query("orderItems").withIndex("by_order_item", (q) => q.eq("orderId", args.orderId)).collect()
+        for(const orderItem of orderItems) {
+            const item = await ctx.db.get(orderItem.itemId)
+            if(item) {
+                await ctx.db.patch(item._id, { quantity: item.quantity - orderItem.quantity })
+            }
+        }
+    }
+})
 
 export const addCartItemsToOrder = internalMutation({
     args: {

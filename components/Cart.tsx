@@ -18,14 +18,14 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
 
     // Initialize the cart items state
     useEffect(() => {
-        if(initialCartItems) {
+        if (initialCartItems) {
             setCartItems(initialCartItems)
         }
     }, [initialCartItems])
 
     // Update the order draft when the order type, cart items, selected date and time are changed
     useEffect(() => {
-        if(cartItems) {
+        if (cartItems) {
             const items = orderType === "donate" ? cartItems.donateItems : cartItems.pickupItems;
             props.onOrderDraftChange({
                 orderType: orderType,
@@ -41,7 +41,7 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
     }
     // Memoize each of the components to handle state changes
     const donateList = useMemo(() => {
-        if(cartItems) {
+        if (cartItems) {
             return (
                 <CartItemList cartItems={cartItems} type="donate" disabled={orderType === "pickup"} onCartItemsChange={handleCartItemsChange} />
             )
@@ -50,7 +50,7 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
     }, [cartItems, orderType])
 
     const pickupList = useMemo(() => {
-        if(cartItems) {
+        if (cartItems) {
             return (
                 <CartItemList cartItems={cartItems} type="pickup" disabled={orderType === "donate"} onCartItemsChange={handleCartItemsChange} />
             )
@@ -71,64 +71,74 @@ export default function Cart(props: { onOrderDraftChange: (draft: OrderDraft) =>
 
     return (
         <VStack w="max-content" marginX="auto" gap={8}>
-            <VStack width="full" gap={2}>
-                <Heading size="xl" fontWeight="semibold">Select which order you want to place</Heading>
-                <RadioCard.Root width="full" defaultValue={orderType} variant="outline">
-                    <HStack width="full" justify="space-between" gap={4}>
-                        {cartItems ? (
-                            <>
-                                {cartItems.donateItems.length > 0 && (
-                                    <RadioCard.Item value="donate" onChange={() => setOrderType("donate")} _checked={{ borderColor: "primary.600", bg: "primary.100/50", shadowColor: "primary.700" }}>
-                                        <RadioCard.ItemHiddenInput />
-                                        <RadioCard.ItemControl>
-                                            <RadioCard.ItemText fontSize="lg">Donate</RadioCard.ItemText>
-                                        </RadioCard.ItemControl>
-                                    </RadioCard.Item>
+            {cartItems && (cartItems.donateItems.length > 0 || cartItems.pickupItems.length > 0) ? (
+                <>
+                    <VStack width="full" gap={2}>
+                        <Heading size="xl" fontWeight="semibold">Select which order you want to place</Heading>
+                        <RadioCard.Root width="full" defaultValue={orderType} variant="outline">
+                            <HStack width="full" justify="space-between" gap={4}>
+                                {cartItems ? (
+                                    <>
+                                        {cartItems.donateItems.length > 0 && (
+                                            <RadioCard.Item value="donate" onChange={() => setOrderType("donate")} _checked={{ borderColor: "primary.600", bg: "primary.100/50", shadowColor: "primary.700" }}>
+                                                <RadioCard.ItemHiddenInput />
+                                                <RadioCard.ItemControl>
+                                                    <RadioCard.ItemText fontSize="lg">Donate</RadioCard.ItemText>
+                                                </RadioCard.ItemControl>
+                                            </RadioCard.Item>
+                                        )}
+                                        {cartItems.pickupItems.length > 0 && (
+                                            <RadioCard.Item value="pickup" onChange={() => setOrderType("pickup")} _checked={{ borderColor: "primary.600", bg: "primary.100/50", shadowColor: "primary.700" }}>
+                                                <RadioCard.ItemHiddenInput />
+                                                <RadioCard.ItemControl>
+                                                    <RadioCard.ItemText fontSize="lg">Pickup</RadioCard.ItemText>
+                                                </RadioCard.ItemControl>
+                                            </RadioCard.Item>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Skeleton height="104px" width="full" />
                                 )}
-                                {cartItems.pickupItems.length > 0 && (
-                                    <RadioCard.Item value="pickup" onChange={() => setOrderType("pickup")} _checked={{ borderColor: "primary.600", bg: "primary.100/50", shadowColor: "primary.700" }}>
-                                        <RadioCard.ItemHiddenInput />
-                                        <RadioCard.ItemControl>
-                                            <RadioCard.ItemText fontSize="lg">Pickup</RadioCard.ItemText>
-                                        </RadioCard.ItemControl>
-                                    </RadioCard.Item>
-                                )}
-                            </>
-                        ) : (
-                            <Skeleton height="104px" width="full" />
-                        )}
-                    </HStack>
-                </RadioCard.Root>
-            </VStack>
-            <VStack width="full" gap={2}>
-                <Heading size="xl" fontWeight="semibold">Select the items you want for this order</Heading>
-                <HStack width="full" justify="space-between" align="stretch" gap={4}>
-                    {cartItems ? (
-                        <>
-                            {cartItems.donateItems.length > 0 && (
-                                <VStack maxH="500px" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "donate" ? "white" : "#F4F4F5"}>
-                                    <Heading size="lg" fontWeight="medium" color={orderType === "donate" ? "black" : "gray.500"}>Donate Items</Heading>
-                                    <Box flex="1" overflowY="auto" width="full">
-                                        {donateList}
-                                    </Box>
-                                </VStack>
+                            </HStack>
+                        </RadioCard.Root>
+                    </VStack>
+                    <VStack width="full" gap={2}>
+                        <Heading size="xl" fontWeight="semibold">Select the items you want for this order</Heading>
+                        <HStack width="full" justify="space-between" align="stretch" gap={4}>
+                            {cartItems ? (
+                                <>
+                                    {cartItems.donateItems.length > 0 && (
+                                        <VStack maxH="500px" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "donate" ? "white" : "#F4F4F5"}>
+                                            <Heading size="lg" fontWeight="medium" color={orderType === "donate" ? "black" : "gray.500"}>Donate Items</Heading>
+                                            <Box flex="1" overflowY="auto" width="full">
+                                                {donateList}
+                                            </Box>
+                                        </VStack>
+                                    )}
+                                    {cartItems.pickupItems.length > 0 && (
+                                        <VStack height="full" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "pickup" ? "white" : "#F4F4F5"}>
+                                            <Heading size="lg" fontWeight="medium" color={orderType === "pickup" ? "black" : "gray.500"}>Pickup Items</Heading>
+                                            <Box flex="1" overflowY="auto" width="full">
+                                                {pickupList}
+                                            </Box>
+                                        </VStack>
+                                    )}
+                                </>
+                            ) : (
+                                <Skeleton height="275px" width="full" />
                             )}
-                            {cartItems.pickupItems.length > 0 && (
-                                <VStack height="full" width="full" border="1px solid" borderColor="gray.200" borderRadius="md" padding={4} backgroundColor={orderType === "pickup" ? "white" : "#F4F4F5"}>
-                                    <Heading size="lg" fontWeight="medium" color={orderType === "pickup" ? "black" : "gray.500"}>Pickup Items</Heading>
-                                    <Box flex="1" overflowY="auto" width="full">
-                                        {pickupList}
-                                    </Box>
-                                </VStack>
-                            )}
-                        </>
-                    ) : (
-                        <Skeleton height="275px" width="full" />
-                    )}
-                </HStack>
-            </VStack>
-            {/* Use a ref to store the selected date and time while preventing re-rendering */}
-            {pickupScheduler}
+                        </HStack>
+                    </VStack>
+                    {/* Use a ref to store the selected date and time while preventing re-rendering */}
+                    {pickupScheduler}
+                </>
+            ) : (
+                <>
+                    <Text fontSize="lg" fontWeight="medium">You have no items in your cart</Text>
+                    <Text fontSize="lg" fontWeight="medium">Add items to your cart to place an order</Text>
+                </>
+            )}
+
         </VStack>
     )
 }

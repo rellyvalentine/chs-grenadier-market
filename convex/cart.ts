@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api, internal } from "./_generated/api";
@@ -18,7 +18,7 @@ export const createCart = internalMutation({
     returns: v.id("cart"),
     handler: async (ctx) => {
         const userId = await getAuthUserId(ctx)
-        if(!userId) {
+        if (!userId) {
             throw new Error("Not authenticated")
         }
         return await ctx.db.insert("cart", { userId: userId })
@@ -30,8 +30,14 @@ export const addItemToCart = mutation({
         itemId: v.id("items"),
         type: v.union(v.literal("donate"), v.literal("pickup")),
     },
-    handler: async (ctx, args): Promise<Id<"cartItems"> | null> => {
-        return await ctx.runMutation(internal.cart.updateCartItem, { operation: "add", itemId: args.itemId, type: args.type })
+    handler: async (ctx, args): Promise<{ success: boolean, message?: string }> => {
+        try {
+            await ctx.runMutation(internal.cart.updateCartItem, { operation: "add", itemId: args.itemId, type: args.type })
+            return { success: true }
+        } catch (error: any) {
+            console.log(error.data)
+            return { success: false, message: error.data.message }
+        }
     }
 })
 
@@ -54,22 +60,36 @@ export const updateCartItem = internalMutation({
     handler: async (ctx, args): Promise<Id<"cartItems"> | null> => {
         // validate user is authenticated
         const userId = await getAuthUserId(ctx)
-        if(!userId) {
+        if (!userId) {
             throw new Error("Not authenticated")
         }
-        
+
         // get the user's cart or create a new one if it doesn't exist
         let cartId = (await ctx.db.query("cart").withIndex("by_user", (q) => q.eq("userId", userId)).unique())?._id
-        if(!cartId) {
+        if (!cartId) {
             cartId = await ctx.runMutation(internal.cart.createCart)
-            if(!cartId) {
+            if (!cartId) {
                 throw new Error("Failed to create cart")
             }
         }
 
         const cartItem: CartItem | null = await ctx.runQuery(internal.cart.getCartItem, { itemId: args.itemId, type: args.type })
-        if(args.operation === "add") {
-            if(cartItem) {
+        if (args.operation === "add") {
+            if (cartItem) {
+                // get the item
+                const item = await ctx.db.get(args.itemId)
+                if (!item) {
+                    throw new Error("Item not found")
+                }
+
+                // check if the item limit has been reached for pickup items
+                if(args.type === "pickup" && item.limit <= (cartItem.quantity)) {
+                    throw new ConvexError({
+                        code: "ITEM_LIMIT_REACHED",
+                        message: "Item limit has been reached",
+                    })
+                }
+
                 // if the cart item already exists, increment the quantity
                 await ctx.db.patch(cartItem._id, { quantity: cartItem.quantity + 1 })
                 return cartItem._id
@@ -79,10 +99,10 @@ export const updateCartItem = internalMutation({
                 return await ctx.db.insert("cartItems", { cartId: cartId, itemId: args.itemId, quantity: 1, type: args.type })
             }
         }
-        else if(args.operation === "remove") {
-            if(cartItem) {
+        else if (args.operation === "remove") {
+            if (cartItem) {
                 // if the quantity is 1, delete the cart item
-                if(cartItem.quantity == 1) {
+                if (cartItem.quantity == 1) {
                     await ctx.db.delete(cartItem._id)
                     return null
                 }
@@ -138,8 +158,8 @@ export const getUserCartItems = query({
 export const getUserCart = internalQuery({
     handler: async (ctx): Promise<Id<"cart"> | undefined> => {
         const userId = await getAuthUserId(ctx)
-        if(!userId) {
-            throw new Error("Not authenticated")   
+        if (!userId) {
+            throw new Error("Not authenticated")
         }
         const cartId = (await ctx.db.query("cart").withIndex("by_user", (q) => q.eq("userId", userId)).unique())?._id
         return cartId
@@ -153,11 +173,11 @@ export const getCartItem = internalQuery({
     },
     handler: async (ctx, args): Promise<CartItem | null> => {
         const cartId: Id<"cart"> | null = await ctx.runQuery(internal.cart.getUserCart)
-        if(!cartId) {
+        if (!cartId) {
             throw new Error("Cart not found")
         }
         // get the cart item from the database by cart id, item id, and type
-        const result = await ctx.db.query("cartItems").withIndex("by_cart_item_and_type", 
+        const result = await ctx.db.query("cartItems").withIndex("by_cart_item_and_type",
             (q) => q.eq("cartId", cartId).eq("itemId", args.itemId).eq("type", args.type)).unique()
 
         // return the cart item if it exists, otherwise return null

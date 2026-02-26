@@ -11,7 +11,7 @@ export default function ProfileDropdown() {
     return (
         <Menu.Root>
             {user ? (
-                <Menu.Trigger>
+                <Menu.Trigger asChild>
                     <IconButton aria-label="Open Profile" variant="ghost" padding={2} borderRadius={4} color="secondary.950" _hover={{ bg: "#F4F4F6" }}>
                         <Text fontWeight="bold" fontSize="md">Profile</Text>
                         <Icon as={FaUser} />

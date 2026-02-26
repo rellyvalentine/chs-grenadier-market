@@ -1,5 +1,6 @@
-import { Item, ItemCategories } from "@/utils/types";
+import { Item, ItemCategories, ItemStatus } from "@/utils/types";
 import { Box, Button, CloseButton, Dialog, Icon, Portal, IconButton, createListCollection, Select, Input, Field, VStack, Textarea, HStack, Image, Text, FileUpload } from "@chakra-ui/react";
+import { Tooltip } from "@/components/ui/tooltip";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Toaster, toaster } from "@/components/ui/toaster"
 import { useForm } from "react-hook-form";
@@ -8,6 +9,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { fromByteArray } from "base64-js";
 import { LuFileImage } from "react-icons/lu";
+import { FaInfoCircle } from "react-icons/fa";
 
 
 
@@ -24,10 +26,14 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
         items: Object.values(ItemCategories)
     })
 
+    const itemStatusCollection = createListCollection({
+        items: Object.values(ItemStatus)
+    })
+
     useEffect(() => {
         if (item) {
+            console.log(item.image)
             setPreviewImage(item.image)
-            console.log(previewImage)
         }
     }, [item])
 
@@ -43,6 +49,7 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
 
     const generateUploadUrl = useMutation(api.items.generateUploadUrl)
     const createItem = useMutation(api.items.createItem)
+    const updateItem = useMutation(api.items.updateItem)
 
     const onSubmit = async (data: Item,) => {
 
@@ -61,6 +68,7 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                     category: data.category,
                     quantity: Number(data.quantity),
                     image: storageId,
+                    limit: Number(data.limit),
                 })
 
                 if (itemId) {
@@ -69,6 +77,7 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                         description: "The item has been created successfully",
                         type: "success",
                     })
+                    setOpen(false)
                 }
                 else {
                     toaster.create({
@@ -83,26 +92,57 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
             }
         }
         else if (variant === "edit") {
-            if (itemImage && itemImage instanceof File) {
-                const uploadUrl = await generateUploadUrl()
-                const result = await fetch(uploadUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": itemImage.type },
-                    body: itemImage,
+            if (item) {
+                let imageId
+                if (itemImage && itemImage instanceof File) {
+                    const uploadUrl = await generateUploadUrl()
+                    const result = await fetch(uploadUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": itemImage.type },
+                        body: itemImage,
+                    })
+                    const { storageId } = await result.json()
+                    imageId = storageId
+                }
+
+                const itemId = await updateItem({
+                    id: item._id,
+                    name: data.name,
+                    description: data.description,
+                    category: data.category,
+                    quantity: Number(data.quantity),
+                    isActive: data.isActive,
+                    image: imageId,
+                    limit: Number(data.limit),
                 })
+                if (itemId) {
+                    toaster.create({
+                        title: "Item updated successfully",
+                        description: "The item has been updated successfully",
+                        type: "success",
+                    })
+                    setOpen(false)
+                }
+                else {
+                    toaster.create({
+                        title: "Failed to update item",
+                        description: "The item was not updated successfully",
+                        type: "error",
+                    })
+                }
             }
         }
     }
 
     return (
         <Dialog.Root open={open} onOpenChange={(e) => { setOpen(e.open); reset(); e.open ? setPreviewImage(item ? item.image : null) : setPreviewImage(null) }} size="lg">
-            <Dialog.Trigger>
+            <Dialog.Trigger asChild>
                 {variant === "edit" ? (
-                    <Box minH="45px" w="full" display="flex" alignItems="center">
+                    <Box minH="45px" display="flex" alignItems="center">
                         <IconButton size="sm" padding={2} variant="outline" aria-label="Edit Item"><Icon as={FaPenToSquare} /></IconButton>
                     </Box>
                 ) : (
-                    <Box minH="45px" w="full" display="flex" alignItems="end">
+                    <Box minH="45px" display="flex" alignItems="end">
                         <Button w="full">Create Item</Button>
                     </Box>
                 )}
@@ -125,7 +165,7 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
 
                                         <Field.Root>
                                             <Field.Label fontSize="md" fontWeight="medium">Item category</Field.Label>
-                                            <Select.Root collection={itemCategoriesCollection} {...register("category")} value={item ? [item.category] : undefined}>
+                                            <Select.Root collection={itemCategoriesCollection} {...register("category")} defaultValue={item ? [item.category] : undefined}>
                                                 <Select.HiddenSelect />
                                                 <Select.Control>
                                                     <Select.Trigger>
@@ -137,7 +177,7 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                                                 </Select.Control>
                                                 <Select.Positioner>
                                                     <Select.Content>
-                                                        {Object.values(ItemCategories).map((category) => (
+                                                        {itemCategoriesCollection.items.map((category) => (
                                                             <Select.Item item={category} key={category}>
                                                                 {category}
                                                                 <Select.ItemIndicator />
@@ -149,14 +189,49 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                                         </Field.Root>
                                     </HStack>
 
-                                    <HStack w="full" justifyContent="space-between">
+                                    <HStack w="full">
                                         <Field.Root>
                                             <Field.Label fontSize="md" fontWeight="medium">Item description</Field.Label>
                                             <Textarea {...register("description")} placeholder="Enter item description" resize="none" />
                                         </Field.Root>
                                         <Field.Root>
+                                            <Field.Label fontSize="md" fontWeight="medium">Item status</Field.Label>
+                                            <Select.Root collection={itemStatusCollection} {...register("isActive", {setValueAs: (value) => value === "Active" ? true : false})} defaultValue={item ? [item.isActive ? ItemStatus.ACTIVE : ItemStatus.INACTIVE] : undefined}>
+                                                <Select.HiddenSelect />
+                                                <Select.Control>
+                                                    <Select.Trigger>
+                                                        <Select.ValueText placeholder="Select status" />
+                                                    </Select.Trigger>
+                                                    <Select.IndicatorGroup>
+                                                        <Select.Indicator />
+                                                    </Select.IndicatorGroup>
+                                                </Select.Control>
+                                                <Select.Positioner>
+                                                    <Select.Content>
+                                                        {itemStatusCollection.items.map((status) => (
+                                                            <Select.Item item={status} key={status}>
+                                                                {status}
+                                                            </Select.Item>
+                                                        ))}
+                                                    </Select.Content>
+                                                </Select.Positioner>
+                                            </Select.Root>
+                                        </Field.Root>
+                                    </HStack>
+
+                                    <HStack w="full">
+                                        <Field.Root>
                                             <Field.Label fontSize="md" fontWeight="medium">Item quantity</Field.Label>
-                                            <Input type="number" {...register("quantity")} placeholder="Enter item quantity" />
+                                            <Input type="number" {...register("quantity")} defaultValue={item ? item.quantity : 0} placeholder="Enter item quantity" />
+                                        </Field.Root>
+                                        <Field.Root>
+                                            <HStack w="full">
+                                                <Field.Label fontSize="md" fontWeight="medium">Item limit</Field.Label>
+                                                <Tooltip content="The maximum number that can be picked up per order" showArrow positioning={{ placement: "right-end" }}>
+                                                    <Icon color="gray.500" as={FaInfoCircle} />
+                                                </Tooltip>
+                                            </HStack>
+                                            <Input type="number" {...register("limit")} defaultValue={item ? item.limit : 0} placeholder="Enter item limit" />
                                         </Field.Root>
                                     </HStack>
 
@@ -164,7 +239,6 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                                         <Box>
                                             <Field.Root>
                                                 <Field.Label fontSize="md" fontWeight="medium">Item image</Field.Label>
-                                                {/* <Input type="file" accept="image/*" onChange={handleItemImageChange} /> */}
                                                 <FileUpload.Root accept="image/*" onChange={handleItemImageChange} >
                                                     <FileUpload.HiddenInput />
                                                     <FileUpload.Trigger asChild>
@@ -176,8 +250,8 @@ export default function ItemModal(props: { item: Item | null, variant: "edit" | 
                                                 </FileUpload.Root>
                                             </Field.Root>
                                         </Box>
-                                        <Box display="flex" alignItems="center" justifyContent="center" w="200px" h="200px" border="1px solid" borderColor="gray.200" borderRadius="md">
-                                            {previewImage ? <Image src={previewImage} alt="Item image" width={200} height={200} /> : <Text fontSize="sm" color="gray.500">No image selected</Text>}
+                                        <Box display="flex" alignItems="center" justifyContent="center" w="200px" h="200px" border="1px solid" borderColor="gray.200" borderRadius="md" overflow="hidden">
+                                            {previewImage ? <Image src={previewImage} alt="Item image" width={200} height={200} objectFit="cover" /> : <Text fontSize="sm" color="gray.500">No image selected</Text>}
                                         </Box>
                                     </HStack>
                                 </VStack>
