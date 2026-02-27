@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { cartItemValidator, orderItemValidator } from "../utils/validators";
@@ -60,12 +60,17 @@ export const updateOrder = mutation({
             throw new Error("Not authenticated")
         }
 
+        const order = await ctx.runQuery(internal.orders.getOrder, { orderId: args.orderId })
+        if(!order) {
+            throw new Error("Order not found")
+        }
+
         // Update the order items
         await ctx.runMutation(internal.orders.updateOrderItems, { orderId: args.orderId, orderItems: args.orderItems })
 
         // Update the item quantities from the order items when the order is fulfilled
         if(args.orderStatus === "fulfilled") {
-            await ctx.runMutation(internal.orders.updateItemQuantities, { orderId: args.orderId })
+            await ctx.runMutation(internal.orders.updateItemQuantities, { orderId: args.orderId, orderType: order.orderType })
         }
 
         // Update the order status
@@ -93,13 +98,19 @@ export const updateOrderItems = internalMutation({
 export const updateItemQuantities = internalMutation({
     args: {
         orderId: v.id("orders"),
+        orderType: v.union(v.literal("donate"), v.literal("pickup")),
     },
     handler: async (ctx, args) => {
         const orderItems = await ctx.db.query("orderItems").withIndex("by_order_item", (q) => q.eq("orderId", args.orderId)).collect()
         for(const orderItem of orderItems) {
             const item = await ctx.db.get(orderItem.itemId)
             if(item) {
-                await ctx.db.patch(item._id, { quantity: item.quantity - orderItem.quantity })
+                if(args.orderType === "pickup") {
+                    await ctx.db.patch(item._id, { quantity: item.quantity - orderItem.quantity })
+                }
+                else if(args.orderType === "donate") {
+                    await ctx.db.patch(item._id, { quantity: item.quantity + orderItem.quantity })
+                }
             }
         }
     }
@@ -232,6 +243,22 @@ export const getPastOrders = query({
         }
         else {
             return []
+        }
+    }
+})
+
+export const getOrder = internalQuery({
+    args: {
+        orderId: v.id("orders"),
+    },
+    handler: async (ctx, args): Promise<Order> => {
+        const order = await ctx.db.get(args.orderId)
+        if(!order) {
+            throw new Error("Order not found")
+        }
+        return {
+            ...order,
+            status: order.status as OrderStatus
         }
     }
 })

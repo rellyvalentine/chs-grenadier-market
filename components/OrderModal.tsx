@@ -52,7 +52,7 @@ export default function OrderModal(props: { order: Order, variant: "table" | "ca
 
     return (
         <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)} size="lg">
-            <Dialog.Trigger w="full">
+            <Dialog.Trigger w="full" asChild>
                 {variant === "table" ? (
                     <Box minH="45px" w="full" display="flex" alignItems="center">
                         <IconButton size="sm" padding={2} variant="outline" aria-label="View Order"><Icon as={FaPenToSquare} /></IconButton>

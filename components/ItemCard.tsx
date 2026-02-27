@@ -57,10 +57,10 @@ export default function ItemCard(props: { item: Item }) {
                 ) : (
                     <>
                         <LoginTrigger>
-                            <Button>Pickup Item</Button>
+                            <Button variant="outline">Pickup Item</Button>
                         </LoginTrigger>
                         <LoginTrigger>
-                            <Button>Donate Item</Button>
+                            <Button variant="outlineSecondary">Donate Item</Button>
                         </LoginTrigger>
                     </>
                 )}
