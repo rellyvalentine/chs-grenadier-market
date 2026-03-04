@@ -1,4 +1,4 @@
-import { GridItem, Grid, Table, Input, Button, HStack, Menu, IconButton, Text, Icon } from "@chakra-ui/react";
+import { GridItem, Grid, Table, Input, Button, HStack, Menu, IconButton, Text, Icon, useCheckboxGroup } from "@chakra-ui/react";
 import { HiSortAscending, HiOutlineEye } from "react-icons/hi";
 import DateRangeSelector from "./DateRangeSelector";
 import { useEffect, useMemo, useState } from "react";
@@ -50,11 +50,33 @@ export default function OrderTable() {
         return acc
     }, {})
 
+    const group = useCheckboxGroup()
+    const [searchQuery, setSearchQuery] = useState("")
+
+    const filteredOrders = useMemo(() => {
+        let orders = pastOrders
+
+        if (group.value.length > 0) {
+            orders = orders.filter((order) => group.value.includes(order.status))
+        }
+
+        const query = searchQuery.trim().toLowerCase()
+        if (query) {
+            orders = orders.filter((order) => {
+                const formattedId = `#${order.orderNumber.toString().padStart(4, '0')}`
+                const name = userMap[order.userId]?.name?.toLowerCase() ?? ""
+                return formattedId.toLowerCase().includes(query) || name.includes(query)
+            })
+        }
+
+        return orders
+    }, [pastOrders, group.value, searchQuery, userMap])
 
     return (
         <Grid w="full" templateColumns="1fr 1fr" templateRows="auto auto" border="1px solid" borderColor="gray.200" borderRadius="md">
             <GridItem colSpan={1} padding={2}>
                 <Input placeholder="Search by Order Id or Name" variant="subtle" w="full" borderRadius="md" _focus={{ borderColor: "secondary.400" }}
+                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </GridItem>
             <GridItem colSpan={1} padding={2}>
@@ -64,6 +86,15 @@ export default function OrderTable() {
                         <Menu.Trigger asChild>
                             <Button size="xs">Status</Button>
                         </Menu.Trigger>
+                        <Menu.Positioner>
+                            <Menu.Content>
+                                <Menu.ItemGroup>
+                                    <Menu.CheckboxItem value="pending" checked={group.value.includes("pending")} onCheckedChange={() => {group.toggleValue("pending")}}>Pending <Menu.ItemIndicator /></Menu.CheckboxItem>
+                                    <Menu.CheckboxItem value="fulfilled" checked={group.value.includes("fulfilled")} onCheckedChange={() => {group.toggleValue("fulfilled")}}>Fulfilled <Menu.ItemIndicator /></Menu.CheckboxItem>
+                                    <Menu.CheckboxItem value="cancelled" checked={group.value.includes("cancelled")} onCheckedChange={() => {group.toggleValue("cancelled")}}>Cancelled <Menu.ItemIndicator /></Menu.CheckboxItem>
+                                </Menu.ItemGroup>
+                            </Menu.Content>
+                        </Menu.Positioner>
                     </Menu.Root>
                     <Menu.Root>
                         <Menu.Trigger asChild>
@@ -90,7 +121,7 @@ export default function OrderTable() {
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {pastOrders?.map((order) => (
+                        {filteredOrders?.map((order) => (
                             <Table.Row key={order._id} fontWeight="medium">
                                 <Table.Cell>#{order.orderNumber.toString().padStart(4, '0')}</Table.Cell>
                                 <Table.Cell>{userMap[order.userId]?.name}</Table.Cell>

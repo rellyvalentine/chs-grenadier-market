@@ -13,24 +13,28 @@ export default function OrderPage() {
     console.log(user);
 
     return (
-        <Skeleton loading={!user}>
-            {user && user.role === "ADMIN" ? (
-                <Grid templateColumns="auto 1fr" h="full" minH="100vh" w="full" gap={12}>
-                    <GridItem minW="250px">
-                        <HStack width="full" height="100%" alignItems="start">
-                            <Sidebar current={undefined} />
-                            <Separator orientation="vertical" size="md" borderColor="secondary.100" height="100%" />
-                        </HStack>
-                    </GridItem>
-                    <GridItem w="75%" marginX="auto">
-                        <OrderSection />
-                    </GridItem>
-                </Grid>
-            ) : (
-                <Grid>
+        <VStack w="full" h="full">
+            {user ? (
+                <>
+                {user.role === "ADMIN" ? (
+                    <Grid templateColumns="auto 1fr" h="full" minH="100vh" w="full" gap={12}>
+                        <GridItem minW="250px">
+                            <HStack width="full" height="100%" alignItems="start">
+                                <Sidebar current="orders" />
+                                <Separator orientation="vertical" size="md" borderColor="secondary.100" height="100%" />
+                            </HStack>
+                        </GridItem>
+                        <GridItem w="75%" marginX="auto">
+                            <OrderSection />
+                        </GridItem>
+                    </Grid>
+                ) : (
                     <Text>You are not authorized to access this page</Text>
-                </Grid>
+                )}
+                </>
+            ) : (
+                <Skeleton w="full" h="full" loading={true} />
             )}
-        </Skeleton>
+        </VStack>
     )
 }

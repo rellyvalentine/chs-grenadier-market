@@ -79,6 +79,7 @@ export default function OrderManager(props: { order: Order, onOrderChange: (orde
                     <Text fontSize="md" fontWeight="bold">Order Status: </Text>
                     {statusSelector}
                 </HStack>
+                <Text fontSize="md" fontWeight="medium"><b>Last updated:</b> {new Date(order.updatedAt).toLocaleString()}</Text>
             </VStack>
         </VStack>
     )
